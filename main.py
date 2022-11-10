@@ -19,13 +19,17 @@ def disconnected(client) :
     print(" Ngat ket noi ...")
     sys.exit (1)
 
-
 def message(client, feed_id, payload ):
     print("Nhan du lieu tu " + feed_id + ": " + payload)
-    # if isMicrobitConnected:
-        # ser.write(("feed: " + feed_id + " send: " +
-        #           str(payload) + "#\n").encode())
-    # ser.write((str(payload) + "#\n").encode())
+    # ser.write((str(payload) + "#").encode())
+
+client = MQTTClient( AIO_USERNAME , AIO_KEY )
+client.on_connect = connected
+client.on_disconnect = disconnected
+client.on_message = message
+client.on_subscribe = subscribe
+client.connect ()
+client.loop_background()
 
 def getPort () :
     # ports = serial.tools.list_ports.comports()
@@ -34,18 +38,15 @@ def getPort () :
     # for i in range(0, N):
     #     port = ports[i]
     #     strPort = str(port)
-    #     # if "USB Serial Device" in strPort:
-    #     if "ELTIMA Virtual Serial Port" in strPort:
+    #     if "USB Serial Device" in strPort:
     #         splitPort = strPort.split(" ")
     #         commPort = (splitPort[0])
     # return commPort
     return "COM4"
 
-isMicrobitConnected = False
 if getPort() != "None":
     print("Connect with " + getPort())
     ser = serial.Serial(port=getPort(), baudrate=115200)
-    isMicrobitConnected = True
 
 def processData ( data ) :
     data = data.replace("!", "")
@@ -57,8 +58,8 @@ def processData ( data ) :
             client.publish("bbc-temp", splitData[2])
         elif splitData[1] == "LIGHT":
             client.publish("bbc-light", splitData[2])
-        elif splitData[1] == "LED":
-            client.publish("bbc-led", splitData[2])
+        elif splitData[1] == "PUMP":
+            client.publish("bbc-pump", splitData[2])
     except:
             pass
         
@@ -76,23 +77,7 @@ def readSerial () :
                 mess = ""
             else :
                 mess = mess [ end +1:]
-                
-
-client = MQTTClient( AIO_USERNAME , AIO_KEY )
-client.on_connect = connected
-client.on_disconnect = disconnected
-client.on_message = message
-client.on_subscribe = subscribe
-client.connect ()
-client.loop_blocking()
-
 
 while True:
-    # value = random.randint(0, 100)
-    # print("Cap nhat :", value )
-    # client.publish ("bbc-temp", value )
-    # time.sleep (20)
-    # if isMicrobitConnected:
-    #     readSerial()
-
+    readSerial()
     time.sleep(1)

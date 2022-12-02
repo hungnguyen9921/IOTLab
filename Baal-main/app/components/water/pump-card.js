@@ -8,8 +8,6 @@ import {
     Typography,
     Button,
 } from '@mui/material';
-import KingBedIcon from '@mui/icons-material/KingBed';
-import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import ShowerIcon from '@mui/icons-material/Shower';
 import ThermostatAutoIcon from '@mui/icons-material/ThermostatAuto';
 import GrassIcon from '@mui/icons-material/Grass';
@@ -118,7 +116,7 @@ const PumpCard = ({
                             sx={{ pl: 1 }}
                             variant="body2"
                         >
-                            {soilMoisture + ' g/m\u00B3'}
+                         g/m\u00B3
                         </Typography>
                     </Grid>
                     <Grid

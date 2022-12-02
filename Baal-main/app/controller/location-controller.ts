@@ -8,6 +8,7 @@ import HumidityRecord from '../models/humidity-record';
 import PumpHistoryRecord from '../models/pump-history-record';
 import DeviceRecord from '../models/device-record';
 import History from '../models/history';
+import { ViewArray } from '@mui/icons-material';
 
 class LocationController {
     private static instance: LocationController;
@@ -75,12 +76,15 @@ class LocationController {
 
     public async deleteLocations(id: string): Promise<Boolean> {
         try {
-            await firebase
+            
+            const query = await firebase
                 .firestore()
                 .collection('location')
-                .doc(id).update({
-                    delete: true,
-                });
+                .doc(id)
+                .get();
+
+            query.ref.delete();
+            
             return true;
         } catch (error) {
             return false;
@@ -166,6 +170,7 @@ class LocationController {
             .doc(location.id)
             .collection('pumpRecords')
             .add({
+                pumpRecordid: record.pumpRecordid,
                 auto: record.auto,
                 startTime: record.startTime,
                 endTime: record.endTime,
@@ -247,6 +252,28 @@ class LocationController {
                     callback(null);
                 } else {
                     callback(HumidityRecord.databaseFactory(snapshot.docs[0]));
+                }
+            });
+    }
+
+
+    public subscribePumpRecord(
+        location: Location,
+        callback: (result: PumpHistoryRecord | null) => void,
+    ): () => void {
+        
+        return firebase
+            .firestore()
+            .collection('location')
+            .doc(location.id)
+            .collection('pumpRecords')
+            .orderBy('endTime', 'desc')
+            .limit(1)
+            .onSnapshot((snapshot) => {
+                if (snapshot.empty) {
+                    callback(null);
+                } else {
+                    callback(PumpHistoryRecord.factory(snapshot.docs[0]));
                 }
             });
     }

@@ -1,7 +1,6 @@
 import Head from 'next/head';
 import { useState, useEffect, useRef, useContext } from 'react';
 import { Box, Container, Grid } from '@mui/material';
-
 import AirHumidity from '../components/dashboard/air-humidity';
 import DashboardLayout from '../components/dashboard-layout';
 import Temperature from '../components/dashboard/temperature';
@@ -16,6 +15,7 @@ import HumidityRecord from '../models/humidity-record';
 
 const Dashboard = () => {
     const isUnmounted = useRef(false);
+    const flag = useRef(false)
     const [temperature, setTemperature] = useState(null);
     const [humidity, setHumidity] = useState(null);
     const [tempRecs, setTempRecs] = useState(null);
@@ -27,6 +27,31 @@ const Dashboard = () => {
     const airUnsubcriber = useRef(() => {});
     const location = areas.length > 0 ? areas[area] : undefined;
     useEffect(() => {
+        const timerId = setInterval(() => {
+            IotServer.getInstance().getTemperatureRecord().then((res) =>{
+                if(res.value >= 35 && flag.current === false){
+                    // const messages = {
+                    //     to: '',
+                    //     body:''
+                    // }
+                    // fetch('/api/messages',{
+                    //     method: 'POST',
+                    //     headers:{
+                    //         'Content-Type':'application-json'
+                    //     },
+                    //     body: JSON.stringify(messages)
+                    // })
+                    console.log("temperature was high");
+                    flag.current = true;
+                } else if(res.value < 35 && flag){
+                    flag.current = false;
+                }
+            });
+        },5000)
+        return () => clearInterval(timerId);
+    }, [])
+    
+    useEffect(() => {
         (async () => {
             IotServer.getInstance().subscribeTemperature((tempRecord) => {
                 tempUnsubcriber.current();
@@ -34,7 +59,6 @@ const Dashboard = () => {
                                 areas[area],
                                 (tempRecordRec) => {
                                    if(tempRecordRec.id !== tempRecord.id){
-                                        console.log(123);
                                         LocationController.getInstance().addTempRecord(
                                             location,
                                             new TemperatureRecord(
@@ -79,28 +103,6 @@ const Dashboard = () => {
     }, []);
 
     useEffect(() => {
-        tempUnsubcriber.current();
-        airUnsubcriber.current();
-        // if (areas.length > 0) {
-        //     tempUnsubcriber.current =
-        //         LocationController.getInstance().subscribeTemperature(
-        //             areas[area],
-        //             (tempRecord) => {
-        //                 if (isUnmounted.current) return;
-        //                 setTemperature(tempRecord);
-        //             },
-        //         );
-
-        //     airUnsubcriber.current =
-        //         LocationController.getInstance().subscribeHumidity(
-        //             areas[area],
-        //             (humidRecord) => {
-        //                 if (isUnmounted.current) return;
-        //                 setHumidity(humidRecord);
-        //             },
-        //         );
-        // }
-
         (async () => {
             if (areas.length > 0) {
                 var temperatureRecordsData =
@@ -119,6 +121,7 @@ const Dashboard = () => {
         })();
     }, [area, areas]);
 
+                
     return (
         <>
             <Head>

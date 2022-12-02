@@ -64,7 +64,7 @@ const Temperature = (props) => {
             } else if (Date.parse(e.collectedTime) < Date.parse(now) - (count + 1) * step) {
                 while (Date.parse(e.collectedTime) < Date.parse(now) - (count + 1) * step) {
                     var newTime = new Date(Date.parse(now) - count * step);
-                    res.push({ value: 0, time: getTime(newTime) });
+                    res.push({ value: e.value, time: getTime(newTime) });
                     count++;
                     if (count == 10) return res;
                 }

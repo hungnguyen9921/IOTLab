@@ -2,6 +2,7 @@ import firebase from 'firebase/compat';
 
 class PumpHistoryRecord {
     public id: string;
+    public pumpRecordid: string;
     public auto: boolean;
     public startTime: Date;
     public endTime: Date;
@@ -12,6 +13,7 @@ class PumpHistoryRecord {
     ): PumpHistoryRecord {
         return new PumpHistoryRecord(
             data.id,
+            data.get('pumpRecordid'),
             data.get('auto'),
             data.get('startTime').toDate(),
             data.get('endTime').toDate(),
@@ -21,12 +23,14 @@ class PumpHistoryRecord {
 
     constructor(
         id: string,
+        pumpRecordid: string,
         auto: boolean,
         startTime: Date,
         endTime: Date,
         user: string,
     ) {
         this.id = id;
+        this.pumpRecordid = pumpRecordid;
         this.auto = auto;
         this.startTime = startTime;
         this.endTime = endTime;

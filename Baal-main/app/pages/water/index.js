@@ -1,10 +1,8 @@
 import Head from 'next/head';
 import { Box, Container, Grid, Pagination } from '@mui/material';
 import { useState, useRef, useEffect, useContext } from 'react';
-
 import 'firebase/compat/firestore';
 import firebase from '../../config/firebase';
-
 import WaterToolbar from '../../components/water/water-toolbar';
 import PumpCard from '../../components/water/pump-card';
 import DashboardLayout from '../../components/dashboard-layout';
@@ -22,7 +20,7 @@ const Water = () => {
     const [pump, setPump] = useState({});
     const [temperature, setTemperature] = useState(0);
     const [humidity, setHumidity] = useState(0);
-
+    
     useEffect(() => {
         if (location) {
             if (componentMounted.current) return undefined;
@@ -54,6 +52,7 @@ const Water = () => {
         console.log('send toggle pump: ' + !pump.status);
         var res = await IotServer.getInstance().setPump(!pump.status);
         if (res) {
+            var temp = await IotServer.getInstance().getPumpRecord();
             var newObj = Object.assign(
                 Object.create(Object.getPrototypeOf(pump)),
                 pump,
@@ -63,17 +62,16 @@ const Water = () => {
                 location,
                 new PumpHistoryRecord(
                     '',
+                    temp.id,
                     false,
                     firebase.firestore.Timestamp.now(),
                     firebase.firestore.Timestamp.now(),
                     '',
                 ),
             );
-            console.log(newObj);
             setPump(newObj);
         }
     };
-
     return (
         <>
             <Head>

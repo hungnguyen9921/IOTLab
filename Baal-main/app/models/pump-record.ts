@@ -1,17 +1,16 @@
 class PumpRecord {
-    public id: number;
+    public id: string;
     public status: boolean;
     public name: string;
 
     constructor(data: {
         id: string;
-        name: string;
-        data: string;
-        unit: string;
+        feed_key: string;
+        value: string;
     }) {
-        this.id = +data.id;
-        this.status = data.data === '1';
-        this.name = data.name;
+        this.id = data.id;
+        this.status = data.value === '3';
+        this.name = data.feed_key;
     }
 }
 

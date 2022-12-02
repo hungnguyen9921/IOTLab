@@ -1,5 +1,4 @@
 import HumidityRecord from './humidity-record';
-import SoilHumidityRecord from './soil-humidity-record';
 import TemperatureRecord from './temperature-record';
 import firebase from 'firebase/compat';
 

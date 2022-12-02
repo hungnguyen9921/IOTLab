@@ -314,6 +314,7 @@ const Stats = () => {
                     }}
                     onAccept={async () => {
                         if (await LocationController.getInstance().deleteLocations(filted[del].id)) {
+                            console.log(123);
                             var res =
                                 await LocationController.getInstance().getLocations(
                                     AuthController.getInstance().getCurrentUser(),

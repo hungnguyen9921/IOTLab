@@ -1,7 +1,6 @@
 import PumpRecord from '../models/pump-record';
 import TemperatureRecord from '../models/temperature-record';
 import HumidityRecord from '../models/humidity-record';
-import SoilHumidityRecord from '../models/soil-humidity-record';
 import sendHttpRequest from '../utils/request-api';
 
 // type Mutable<T> = {
@@ -19,7 +18,7 @@ class IotServer {
 
     private constructor() {
         this.username = 'HungNguyenHung';
-        this.password = 'aio_VHTL26ywnuANNj21416rMlAmjQbZ';
+        this.password = 'aio_csSN25D2Mf6etADAoUQZI7mXmRKC';
 
         setInterval(this.update.bind(this), 6000);
     }
@@ -39,7 +38,7 @@ class IotServer {
                 undefined,
                 this.password,
             );
-            return new PumpRecord(JSON.parse(res.data[0].value));
+                return new PumpRecord(res.data[0]);
         } catch (error) {
             console.error(error);
             return null;
@@ -76,6 +75,7 @@ class IotServer {
             return null;
         }
     }
+    
 
     public subscribePump(callback: (result: PumpRecord) => void): void {
         this.getPumpRecord().then((result) => {

@@ -284,7 +284,7 @@ class LocationController {
         try {
             var res = await firebase
                 .firestore()
-                .collection('locations')
+                .collection('location')
                 .doc(location.id)
                 .collection('devices')
                 .get();
@@ -301,7 +301,7 @@ class LocationController {
         try {
             const query = await firebase
                 .firestore()
-                .collection('locations')
+                .collection('location')
                 .doc(location.id)
                 .collection('devices')
                 .where('id', '==', record.id)
@@ -319,7 +319,7 @@ class LocationController {
     ): void {
         firebase
             .firestore()
-            .collection('locations')
+            .collection('location')
             .doc(location.id)
             .collection('devices')
             .onSnapshot((snapshot) => {
@@ -341,7 +341,7 @@ class LocationController {
     ): Promise<void> {
         firebase
             .firestore()
-            .collection('locations')
+            .collection('location')
             .doc(location.id)
             .collection('devices')
             .add(record.toObject());
@@ -354,7 +354,7 @@ class LocationController {
         try {
             const query = await firebase
                 .firestore()
-                .collection('locations')
+                .collection('location')
                 .doc(location.id)
                 .collection('devices')
                 .where('id', '==', record.id)

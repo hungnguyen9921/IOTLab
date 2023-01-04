@@ -138,7 +138,7 @@ const DashboardSidebar = (props) => {
                     </Grid>
                     <Grid item xs={8}>
                         <Typography variant="h5" fontWeight="bold" pr="20px">
-                            Greenhouse
+                            StoreHouse
                         </Typography>
                     </Grid>
                 </Grid>

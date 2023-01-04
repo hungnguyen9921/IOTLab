@@ -1,21 +1,24 @@
 import Head from 'next/head';
 import { useState, useEffect, useRef, useContext } from 'react';
 import { Box, Container, Grid } from '@mui/material';
+import axios from 'axios';
 import AirHumidity from '../components/dashboard/air-humidity';
 import DashboardLayout from '../components/dashboard-layout';
 import Temperature from '../components/dashboard/temperature';
+import TemperatureRecord from '../models/temperature-record';
+import HumidityRecord from '../models/humidity-record';
 import AirHumidityCard from '../components/dashboard/air-humidity-card';
 import TemperatureCard from '../components/dashboard/temperature-card';
 import AreaCard from '../components/dashboard/area-card';
 import IotServer from '../controller/adafruit-io';
-import TemperatureRecord from '../models/temperature-record';
 import AppContext from '../context/app-context';
 import LocationController from '../controller/location-controller';
-import HumidityRecord from '../models/humidity-record';
 
 const Dashboard = () => {
     const isUnmounted = useRef(false);
     const flag = useRef(false)
+    const addTempFlag = useRef(false);
+    const addHumiFlag = useRef(false);
     const [temperature, setTemperature] = useState(null);
     const [humidity, setHumidity] = useState(null);
     const [tempRecs, setTempRecs] = useState(null);
@@ -26,76 +29,62 @@ const Dashboard = () => {
     const tempUnsubcriber = useRef(() => {});
     const airUnsubcriber = useRef(() => {});
     const location = areas.length > 0 ? areas[area] : undefined;
-    useEffect(() => {
-        const timerId = setInterval(() => {
-            IotServer.getInstance().getTemperatureRecord().then((res) =>{
-                if(res.value >= 35 && flag.current === false){
-                    // const messages = {
-                    //     to: '',
-                    //     body:''
-                    // }
-                    // fetch('/api/messages',{
-                    //     method: 'POST',
-                    //     headers:{
-                    //         'Content-Type':'application-json'
-                    //     },
-                    //     body: JSON.stringify(messages)
-                    // })
-                    console.log("temperature was high");
-                    flag.current = true;
-                } else if(res.value < 35 && flag){
-                    flag.current = false;
-                }
-            });
-        },5000)
-        return () => clearInterval(timerId);
-    }, [])
     
     useEffect(() => {
-        (async () => {
-            IotServer.getInstance().subscribeTemperature((tempRecord) => {
-                tempUnsubcriber.current();
-                tempUnsubcriber.current = LocationController.getInstance().subscribeTemperature(
-                                areas[area],
-                                (tempRecordRec) => {
-                                   if(tempRecordRec.id !== tempRecord.id){
-                                        LocationController.getInstance().addTempRecord(
-                                            location,
-                                            new TemperatureRecord(
-                                                tempRecord.id,
-                                                tempRecord.deviceId,
-                                                tempRecord.value,
-                                                tempRecord.name,
-                                                tempRecord.collectedTime
-                                            ),
-                                        );
-                                   }
-                                },
-                            );
-                if (!isUnmounted.current) setTemperature(tempRecord);
-            })
-            IotServer.getInstance().subscribeHumidity((humidRecord) => {
-                airUnsubcriber.current();
-                airUnsubcriber.current = LocationController.getInstance().subscribeHumidity(
-                    areas[area],
-                    (humiRecordRec) => {
-                       if(humiRecordRec.id !== humidRecord.id){
-                            LocationController.getInstance().addHumiRecord(
-                                location,
-                                new HumidityRecord(
-                                    humidRecord.id,
-                                    humidRecord.deviceId,
-                                    humidRecord.value,
-                                    humidRecord.name,
-                                    humidRecord.collectedTime
-                                ),
-                            );
-                       }
-                    },
-                );
-                if (!isUnmounted.current) setHumidity(humidRecord);
-            })
-        }) ()
+        if(areas.length > 0 ){
+                (async () => {
+                console.log("ngoài cùng");
+                IotServer.getInstance().subscribeTemperature((tempRecord) => {
+                    tempUnsubcriber.current();
+                    tempUnsubcriber.current = LocationController.getInstance().subscribeTemperature(
+                                    areas[area],
+                                    (tempRecordRec) => {
+                                        console.log("ở giữa");
+                                    if(tempRecordRec.id !== tempRecord.id && addTempFlag.current === false){
+                                            console.log("Trong cùng");
+                                            addTempFlag.current = true;
+                                            LocationController.getInstance().addTempRecord(
+                                                location,
+                                                new TemperatureRecord(
+                                                    tempRecord.id,
+                                                    tempRecord.deviceId,
+                                                    tempRecord.value,
+                                                    tempRecord.name,
+                                                    tempRecord.collectedTime
+                                                ),
+                                            );
+                                    }
+                                    },
+                                );
+                    if (!isUnmounted.current) setTemperature(tempRecord);
+                })
+                IotServer.getInstance().subscribeHumidity((humidRecord) => {
+                    airUnsubcriber.current();
+                    airUnsubcriber.current = LocationController.getInstance().subscribeHumidity(
+                        areas[area],
+                        (humiRecordRec) => {
+                            console.log("ở giữa humi");
+                        if(humiRecordRec.id !== humidRecord.id && addHumiFlag.current === false){
+                                addHumiFlag.current = true;
+                                console.log("trong cùng humi");
+                                LocationController.getInstance().addHumiRecord(
+                                    location,
+                                    new HumidityRecord(
+                                        humidRecord.id,
+                                        humidRecord.deviceId,
+                                        humidRecord.value,
+                                        humidRecord.name,
+                                        humidRecord.collectedTime
+                                    ),
+                                );
+                        }
+                        },
+                    );
+                    if (!isUnmounted.current) setHumidity(humidRecord);
+                })
+            }) ()
+        }
+        
         
         return () => {
             isUnmounted.current = true;
@@ -103,6 +92,52 @@ const Dashboard = () => {
     }, []);
 
     useEffect(() => {
+        const timerId = setInterval(() => {
+            addTempFlag.current = false;
+            addHumiFlag.current = false;
+            IotServer.getInstance().getTemperatureRecord().then((res) =>{
+                if(res.value >= 29 && flag.current === false){
+                    const to = '+84365256850';
+                    const body = 'This is auto warning message from IOT assigment'
+                    const res = axios.post('http://localhost:5000/api/messages',{
+                        to,
+                        body,
+                    })
+                    console.log(res.data);
+                    console.log("temperature was high");
+                    flag.current = true;
+                } else if(res.value < 29 && flag){
+                    console.log("temperature was normal");
+                }
+            });
+        },5000)
+        return () => clearInterval(timerId);
+    }, [])
+    
+    useEffect(() => {
+        tempUnsubcriber.current();
+        airUnsubcriber.current();
+
+        if (areas.length > 0) {
+            tempUnsubcriber.current =
+                LocationController.getInstance().subscribeTemperature(
+                    areas[area],
+                    (tempRecord) => {
+                        if (isUnmounted.current) return;
+                        setTemperature(tempRecord);
+                    },
+                );
+
+            airUnsubcriber.current =
+                LocationController.getInstance().subscribeHumidity(
+                    areas[area],
+                    (humidRecord) => {
+                        if (isUnmounted.current) return;
+                        setHumidity(humidRecord);
+                    },
+                );
+        }
+
         (async () => {
             if (areas.length > 0) {
                 var temperatureRecordsData =
@@ -113,14 +148,12 @@ const Dashboard = () => {
                     await LocationController.getInstance().getHumidityRecords(
                         areas[area],
                     );
-
                 if (isUnmounted.current) return;
                 setTempRecs(temperatureRecordsData);
                 setAirHumRecs(airHumidityRecordsData);
             }
         })();
     }, [area, areas]);
-
                 
     return (
         <>

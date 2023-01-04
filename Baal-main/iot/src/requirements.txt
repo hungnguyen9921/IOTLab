@@ -1,3 +1,0 @@
-adafruit-io
-pyserial
-firebase-admin

@@ -18,7 +18,7 @@ class IotServer {
 
     private constructor() {
         this.username = 'HungNguyenHung';
-        this.password = 'aio_csSN25D2Mf6etADAoUQZI7mXmRKC';
+        this.password = '';
 
         setInterval(this.update.bind(this), 6000);
     }

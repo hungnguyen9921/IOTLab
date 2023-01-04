@@ -34,7 +34,7 @@ const AirHumidity = (props) => {
     
     function getValues(data, select) {
         if (data.length == 0) return [];
-
+        
         function getTime(date) {
             if (select == 0 || select == 1) {
                 var hours = date.getHours().toString();
@@ -68,7 +68,6 @@ const AirHumidity = (props) => {
                     count++;
                     if (count == 10) return res;
                 }
-
                 newTime = new Date(Date.parse(now) - count * step);
                 res.push({ value: e.value, time: getTime(newTime) });
                 count++;

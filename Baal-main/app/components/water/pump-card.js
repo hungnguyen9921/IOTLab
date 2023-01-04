@@ -17,7 +17,6 @@ const PumpCard = ({
     pump,
     temperature,
     humidity,
-    soilMoisture,
     togglePump,
 }) => {
     return (
